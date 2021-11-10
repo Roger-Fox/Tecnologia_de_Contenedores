@@ -89,19 +89,20 @@ Al ingresar al endpoint de elasticsearch se puede ver que la política fue corre
 
 ![politics_list](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/Captura%20de%20pantalla%20de%202021-11-07%2021-51-08.png)
 Al haber creado la política procedimos a crear el template del índice mediante el comando:  
+
 >curl -X PUT "localhost:9200/_index_template/hot_warm_cold_template?pretty" -H 'Content-Type: application/json' -d'
 >{
->"index_patterns": ["hotwarmcold"],
->"data_stream": { },
+>"index_patterns": ["hotWarmCold-*"],
 >"template": {
 >"settings": {
 >"number_of_shards": 1,
 >"number_of_replicas": 0,
->"index.lifecycle.name": "hot_warm_cold_project"
+>"index.lifecycle.name": "hot_warm_cold_project",
+>"index.lifecycle.rollover_alias": "hotWarmCold",
+>"index.mapping.total_fields.limit":"2000"
 >}
 >}
->}
->'*  
+>}'
 
 
 Teniendo en cuenta que no es posible que Logstash haga uso de Data streams, hicimos cambios en la configuración de pipeline de Logstash, para lo cual detuvimos el proceso de todos los clusters de la arquitectura. Al terminar esta modificación, el archivo logstash.conf quedo así:  
@@ -128,26 +129,12 @@ Teniendo en cuenta que no es posible que Logstash haga uso de Data streams, hici
 >	}
 >}*  
 
-Una vez terminada la configuración procedimos a crear una plantilla para el índice o Index Template con el siguiente comando:  
-
->curl -X PUT "localhost:9200/_index_template/hot_warm_cold_template?pretty" -H 'Content-Type: application/json' -d'
->{
->"index_patterns": ["hotWarmCold-*"],
->"template": {
->"settings": {
->"number_of_shards": 1,
->"number_of_replicas": 0,
->"index.lifecycle.name": "hot_warm_cold_project",
->"index.lifecycle.rollover_alias": "hotWarmCold"
->}
->}
->}'
 
 Tambien se creó un índice con el comando:  
 >curl -X PUT "localhost:9200/hot_warm_cold_index-000001?pretty" -H 'Content-Type: application/json' -d'
 >{
 >"aliases": {
->"hot_warm_cold": {
+>"hotWarmCold": {
 >"is_write_index": true
 >}
 >}
