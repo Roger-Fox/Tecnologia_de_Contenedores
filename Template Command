@@ -1,0 +1,13 @@
+curl -X PUT "localhost:9200/_index_template/hotWarmColdTemplate?pretty"-H 'Content-Type: application/json' -d'
+{
+"index_patterns": ["HotWarmCold-*"],
+"template": {
+"settings": {
+"number_of_shards": 1,
+"number_of_replicas": 0,
+"index.lifecycle.name": "hot_warm_cold_project",
+"index.lifecycle.rollover_alias": "hotWarmColdAlias"
+}
+}
+}
+'
