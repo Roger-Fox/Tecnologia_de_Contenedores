@@ -1,7 +1,13 @@
 # Tecnologia de Contenedores  
 ## Proyecto de Tecnologia de Contenedores - Hot Warm and Cold
 ## Integrantes: James Allan Weisnner - Verbo Julian Camacho  
-  
+
+## Descripción General  
+La finalidad del proyecto es construir una arquitectura con varios contenedores en Docker que sea capaz de realizar el ciclo de vida Hot Warm y Cold de datos por medio de una arquitectura ELK (Elasticsearch Logstach y Kibana), esto se logra mediante un "cluster" que agrupa 3 contenedores para Elasticsearch, uno para Logstach y otro para Kibana, todos interconectados por medio de una red, y agrupados por el archivo docker compose *"Proyecto-compose.yml"*.  
+
+Con una arquitectura ELK operativa, solo quedaría el paso de poblarla con datos provenientes de otro contenedor docker, en este caso se ha considerado hacer un programa sencillo en Python, cuya salida sean lecturas regulares del CPU del computador. Al haber la suficiente cantidad de datos podremos apreciar de forma práctica como cada cierta cantidad de tiempo los documentos creados por el contenedor con el programa de Python son procesados pasando primero por la fase hot, luego a la fase warm, y finalmente a la fase de congelamiento, donde se realizará un almacenamiento masivo con pocos recursos dedicados de datos que pasan a ser "caducos", ya sea por una configuración de límite de tiempo o peso por fase. *Esta decisión se ve más claramente más adelante cuando definimos el comando para crear las políticas del ciclo de vida de los datos*  
+
+## Bitácora del proyecto  
 Primero fue necesario instalar la imagen de elasticsearch, la cual puede conseguirse en la pagina oficial y en el portal Docker hub.  
 
 >docker pull docker.elastic.co/elasticsearch/elasticsearch:7.15.  
@@ -141,4 +147,6 @@ Tambien se creó un índice con el comando:
 >}
 >'  
 
-![List_of_indexes](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/index_management.png)
+![List_of_indexes](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/index_management.png)  
+
+Con todo configurado, solo faltaría agregar algunos documentos para ver como son procesados por las tres fases principales de hot, warm y cold.  
