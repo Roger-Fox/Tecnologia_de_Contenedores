@@ -32,56 +32,56 @@ Ejecutamos el comando docker ps, y nos damos cuenta de los tres nodos de frio, t
 
 Con toda nuestra arquitectura ELK funcionando, empezamos a escribir el comando que definiría las políticas de ciclo de vida de los datos. Este paso tomo un tiempo considerable, pues no comprendíamos bien como funcionaban dichos comandos, finalmente utilizamos una política que representa bien el ciclo de vida Hot, Warm y Cold. Este puede ser visto en el repositorio del proyecto bajo el nombre “ILM Command”, el comando fue:  
 
->curl -X PUT "localhost:9200/_ilm/policy/timeseries_policy?pretty" -H 'Content-Type: application/json' -d'
->{
->"policy" : {
->      "phases" : {
->        "hot" : {
->          "min_age" : "0ms",
->          "actions" : {
->            "rollover" : {
->              "max_size" : "30mb",
->              "max_age" : "5m"
->            },
->            "set_priority" : {
->              "priority" : 100
->            }
->          }
->        },
->        "warm" : {
->          "min_age" : "6m",
->          "actions" : {
->            "allocate" : {
->              "include" : { },
->              "exclude" : { },
->              "require" : {
->                "box_type" : "warm"
->              }
->            },
->            "set_priority" : {
->              "priority" : 50
->            }
->          }
->        },
->        "cold" : {
->          "min_age" : "8m",
->          "actions" : {
->            "allocate" : {
->              "include" : { },
->              "exclude" : { },
->              "require" : {
->                "box_type" : "cold"
->              }
->            },
->            "freeze" : { },
->           "set_priority" : {
->              "priority" : 0
->            }
->          }
->        }
->      }
->    }
->}' 
+>curl -X PUT "localhost:9200/_ilm/policy/timeseries_policy?pretty" -H 'Content-Type: application/json' -d'  
+>{  
+>"policy" : {  
+>      "phases" : {  
+>        "hot" : {  
+>          "min_age" : "0ms",  
+>          "actions" : {  
+>            "rollover" : {  
+>              "max_size" : "30mb",  
+>              "max_age" : "5m"  
+>            },  
+>            "set_priority" : {  
+>              "priority" : 100  
+>            }  
+>          }  
+>        },  
+>        "warm" : {  
+>          "min_age" : "6m",  
+>          "actions" : {  
+>            "allocate" : {  
+>              "include" : { },  
+>              "exclude" : { },  
+>              "require" : {  
+>                "box_type" : "warm"  
+>              }  
+>            },  
+>            "set_priority" : {  
+>              "priority" : 50  
+>            }  
+>          }  
+>        },  
+>        "cold" : {  
+>          "min_age" : "8m",  
+>          "actions" : {  
+>            "allocate" : {  
+>              "include" : { },  
+>              "exclude" : { },  
+>              "require" : {  
+>                "box_type" : "cold"  
+>              }  
+>            },  
+>            "freeze" : { },  
+>           "set_priority" : {  
+>              "priority" : 0  
+>            }  
+>          }  
+>        }  
+>      }  
+>    }  
+>}'   
 
 Al ingresar al endpoint de elasticsearch se puede ver que la política fue correctamente creada. La política se llama “timeseries_policy”.  
 
@@ -89,54 +89,54 @@ Al ingresar al endpoint de elasticsearch se puede ver que la política fue corre
 
 Al haber creado la política procedimos a crear el template del índice mediante el comando:  
 
->curl -X PUT "localhost:9200/_index_template/webseries_template?pretty" -H 'Content-Type: application/json' -d'
->{
->"index_patterns": ["webseries-*"],
->"template": {
->"settings": {
->"number_of_shards": 1,
->"number_of_replicas": 0,
->"index.lifecycle.name": "timeseries_policy",
->"index.lifecycle.rollover_alias": "webseries"
->}
->}
+>curl -X PUT "localhost:9200/_index_template/webseries_template?pretty" -H 'Content-Type: application/json' -d'  
+>{  
+>"index_patterns": ["webseries-*"],  
+>"template": {  
+>"settings": {  
+>"number_of_shards": 1,  
+>"number_of_replicas": 0,  
+>"index.lifecycle.name": "timeseries_policy",  
+>"index.lifecycle.rollover_alias": "webseries"  
+>}  
+>}  
 >}'  
 
 
 
 Teniendo en cuenta que no es posible que Logstash haga uso de Data streams, hicimos cambios en la configuración de pipeline de Logstash, para lo cual detuvimos el proceso de todos los clusters de la arquitectura. Al terminar esta modificación, el archivo logstash.conf quedo así:  
 
->input {
->	beats {
->		port => 5044
->	}
+>input {  
+>	beats {  
+>		port => 5044  
+>	}  
 >
->	tcp {
->		port => 5000
->	}
->}
+>	tcp {  
+>		port => 5000  
+>	}  
+>}  
 >
->'## Add your filters / logstash plugins configuration here'
+>'## Add your filters / logstash plugins configuration here'  
 >
->output {
->	elasticsearch {
->		hosts => "elastic01:9200"
->		ilm_enabled => true
->		ilm_rollover_alias => "hotWarmCold"
->		ilm_policy => "timeseries_policy"
->		ecs_compatibility => disabled
->	}
->}*  
+>output {  
+>	elasticsearch {  
+>		hosts => "elastic01:9200"  
+>		ilm_enabled => true  
+>		ilm_rollover_alias => "hotWarmCold"  
+>		ilm_policy => "timeseries_policy"  
+>		ecs_compatibility => disabled  
+>	}  
+>}*    
 
 
 Tambien se creó un índice con el comando:  
->curl -X PUT "localhost:9200/webseries-000004?pretty" -H'Content-Type: application/json' -d'
->{
->"aliases": {
->"webseries": {
->"is_write_index": true
->}
->}
+>curl -X PUT "localhost:9200/webseries-000004?pretty" -H'Content-Type: application/json' -d'  
+>{  
+>"aliases": {  
+>"webseries": {  
+>"is_write_index": true  
+>}  
+>}  
 >}'  
 
 ![List_of_indexes](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/data_discover.png)  
