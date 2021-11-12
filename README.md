@@ -139,6 +139,17 @@ Tambien se creó un índice con el comando:
 >}  
 >}'  
 
-![List_of_indexes](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/data_discover.png)  
+![data_discover](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/data_discover.png)  
 
-Con todo configurado, solo faltaría agregar algunos documentos para ver como son procesados por las tres fases principales de hot, warm y cold. Esta prueba fue realizada con los datos de registro dados en clase, estos pueden ser encontrados en el archivo *"weblog.csv"*
+Con todo configurado, solo faltaría agregar algunos documentos para ver como son procesados por las tres fases principales de hot, warm y cold. Esta prueba fue realizada con los datos de registro dados en clase, estos pueden ser encontrados en el archivo *"weblog.csv"*  
+
+A continuación, se puede apreciar el funcionamiento del ciclo de vida hot, warm y cold con los logs que hemos cargado anteriormente:  
+![index_list](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/indexes_Iist.png)  
+*Lista de índices creados en el momento de la captura de pantalla (pueden haber mas)*  
+
+### Índices en estado caliente (hot):  
+![index_3](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/index_3.png)  
+### Índices en estado tibio (warm):  
+![index_1](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/index_1.png)  
+![index_2](https://github.com/Roger-Fox/Tecnologia_de_Contenedores/blob/main/pictures/index_2.png)  
+Con esto nos damos cuenta de que Elasticsearch está haciendo la transición de fases correctamente gracias a la configuración de las políticas de ciclo de vida hechas al principio. Claramente la fase warm contiene mas documentos que la fase hot, pero la fase cold maneja muchos mas que los dos anteriores, debido a su correspondiente naturaleza de ser una fase con pocos recursos, pero de gran potencial de almacenamiento, en una fase proxima, la arquitectura deberia hacer "snapshots" dada una configuración.  
